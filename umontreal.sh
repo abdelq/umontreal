@@ -1,23 +1,28 @@
 #!/bin/sh
 
-rm /tmp/umontreal.json 2> /dev/null
+USERNAME="p0000000"
+PASSWORD="123456"
 
-HIDDEN_INPUTS=`http https://identification.umontreal.ca/cas/login.aspx | grep hidden`
-VIEWSTATE=`grep id=\"__VIEWSTATE\" <<< $HIDDEN_INPUTS | cut -d'"' -f 8`
-EVENTVALIDATION=`grep id=\"__EVENTVALIDATION\" <<< $HIDDEN_INPUTS | cut -d'"' -f 8`
+# Authentication
+HIDDEN_INPUTS=`curl https://identification.umontreal.ca/cas/login.aspx | grep hidden`
+VIEWSTATE=`grep \"__VIEWSTATE\" <<< $HIDDEN_INPUTS | cut -d'"' -f 8` # XXX
+EVENTVALIDATION=`grep \"__EVENTVALIDATION\" <<< $HIDDEN_INPUTS | cut -d'"' -f 8` # XXX
 
-http --session=/tmp/umontreal.json -f POST https://identification.umontreal.ca/cas/login.aspx \
-  Content-Type:application/x-www-form-urlencoded \
-  __VIEWSTATE="$VIEWSTATE" \
-  txtIdentifiant=dsfsdaf \
-  txtMDP=adsfasdf \
-  btnValider=Valider \
-  __EVENTVALIDATION="$EVENTVALIDATION"
+curl -s -o /dev/null \
+    -c /tmp/umontreal \
+    --data-urlencode "txtIdentifiant=$USERNAME" \
+    --data-urlencode "txtMDP=$PASSWORD" \
+    --data-urlencode "__VIEWSTATE=$VIEWSTATE" \
+    --data-urlencode "__EVENTVALIDATION=$EVENTVALIDATION" \
+    --data-urlencode "btnValider=Valider" \
+    https://identification.umontreal.ca/cas/login.aspx
 
-http --follow --session=/tmp/umontreal.json https://identification.umontreal.ca/cas/login.ashx \
-    service=="https://studium.umontreal.ca/login/index.php" \
-    gateway=="true"
+curl -s -o /dev/null \
+    -c /tmp/umontreal -b /tmp/umontreal \
+    -L -G -d "service=https://studium.umontreal.ca/login/index.php" \
+    https://identification.umontreal.ca/cas/login.ashx
 
-# Do whatever here...
-
-http --session=/tmp/umontreal.json "https://studium.umontreal.ca/course/view.php?id=123456789" | htmlfmt
+# TODO
+curl -b /tmp/umontreal \
+    -G -d "id=123456" \
+    https://studium.umontreal.ca/course/view.php | htmlfmt
