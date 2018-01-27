@@ -1,12 +1,8 @@
 #!/bin/sh
 
-# TODO Better explanation
-# Syntax: ./download.sh NomExercice
-# Si le nom de l'exercice n'est pas inclus, chercher le dernier
-
 USERNAME=""
 PASSWORD=""
-HOMEWORKS_ID=""
+COURSEID=""
 
 # Authentication
 HIDDEN_INPUTS=`curl -s https://identification.umontreal.ca/cas/login.aspx | grep hidden`
@@ -25,15 +21,20 @@ curl -s -o /dev/null -c /tmp/umontreal -b /tmp/umontreal \
     -LG -d "service=https://studium.umontreal.ca/login/index.php" \
     https://identification.umontreal.ca/cas/login.ashx
 
+SESSKEY=`curl -s -b /tmp/umontreal https://studium.umontreal.ca | grep -oP "(?<=sesskey\":\")\w+"` # XXX
+
+# Students
+curl -b /tmp/umontreal -o students.csv -d "id=$COURSEID" \
+    https://studium.umontreal.ca/grade/export/txt/export.php
+
 # Homework
-HOMEWORK=`curl -s -b /tmp/umontreal -G -d "id=$HOMEWORKS_ID" \
+HOMEWORK=`curl -s -b /tmp/umontreal -G -d "id=$COURSEID" \
     https://studium.umontreal.ca/mod/assign/index.php |
-    grep "assign/view" | grep -i "$1" | tail -n1`
+    grep "assign/view" | grep -i "$1" | tail -n1` # XXX
 
-HOMEWORK_ID=`grep -oP "(?<=id=)\d+" <<< $HOMEWORK`
-HOMEWORK_NAME=`grep -oP "(?<=>)\w+(?=<)" <<< $HOMEWORK`
+HOMEWORK_ID=`grep -oP "(?<=id=)\d+" <<< $HOMEWORK` # XXX
+HOMEWORK_NAME=`grep -oP "(?<=>)\w+(?=<)" <<< $HOMEWORK` # XXX
 
-curl -b /tmp/umontreal -G -d "id=$HOMEWORK_ID" -d "action=downloadall" \
-    https://studium.umontreal.ca/mod/assign/view.php > "$HOMEWORK_NAME.zip"
-
-unzip "$HOMEWORK_NAME" -d "$HOMEWORK_NAME" && rm "$HOMEWORK_NAME.zip"
+curl -b /tmp/umontreal -o "$HOMEWORK_NAME.zip" \
+    -G -d "id=$HOMEWORK_ID" -d "action=downloadall" \
+    https://studium.umontreal.ca/mod/assign/view.php
