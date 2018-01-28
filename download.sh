@@ -49,5 +49,3 @@ ASSIGNMENTNAME=`grep -oP ">\K\w+(?=<)" <<< $ASSIGNMENT`
 curl -b /tmp/umontreal -o "$ASSIGNMENTNAME.zip" \
     -G -d "id=$ASSIGNMENTID" -d "action=downloadall" \
     $STUDIUM/mod/assign/view.php
-
-# TODO Verify the downloaded zip, using file(1)
