@@ -1,15 +1,20 @@
 #!/bin/sh
 
-unzip "$1" -d "${1/.zip/}" && rm "$1"
+# Usage: prepare.sh assignment[.zip]
 
-STUDENTS=`awk -F, '{ gsub(/"/, x); gsub(/\47/, x); print $3, $1, $2 }' students.csv`
+ASSIGNMENT="${1/.zip/}"
 
-for dir in "$1"/*
+# Extract
+unzip "$1" -d "$ASSIGNMENT" && rm "$ASSIGNMENT.zip"
+
+STUDENTS=`cat students.csv | tr -d \'\" | awk -F, '{ print $3, $1, $2 }'`
+for dir in "$ASSIGNMENT"/*
 do
-    # Rename to ID number
-    STUDENT_NAME=`basename "${dir/_*/}"`
-    STUDENT_ID=`grep "$STUDENT_NAME" <<< "$STUDENTS" | awk '{ print $1 }'`
-    mv "$dir" "$1/$STUDENT_ID"
+    # Copy grading file
+    cp grade.md "$dir"
 
-    # TODO Copy grading file
+    # Rename directory to ID number
+    STUDENT_NAME=`basename "${dir/_*/}"` # XXX
+    STUDENT_ID=`grep "$STUDENT_NAME" <<< "$STUDENTS" | awk '{ print $1 }'` # XXX
+    mv "$dir" "$ASSIGNMENT/$STUDENT_ID"
 done
