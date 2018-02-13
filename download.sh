@@ -44,7 +44,7 @@ ASSIGNMENT=`curl -s -b /tmp/umontreal -G -d "id=$COURSEID" \
     grep "assign/view" | grep -i "$1" | tail -n1`
 
 ASSIGNMENTID=`grep -oP "id=\K\d+" <<< $ASSIGNMENT`
-ASSIGNMENTNAME=`grep -oP ">\K\w+(?=<)" <<< $ASSIGNMENT`
+ASSIGNMENTNAME=`grep -oP ">\K[\w\s]+(?=<)" <<< $ASSIGNMENT`
 
 curl -b /tmp/umontreal -o "$ASSIGNMENTNAME.zip" \
     -G -d "id=$ASSIGNMENTID" -d "action=downloadall" \
