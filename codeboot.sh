@@ -1,4 +1,6 @@
-#/bin/bash
+#!/bin/bash
 
-FILE="@C$(basename "$1")@0$(sed ':a;N;$!ba;s/\n/@N/g' "$1")@E"
-firefox "codeboot.org/query.cgi?REPLAY=$(base64 <<< $FILE)"
+CODEBOOT="http://www-labs.iro.umontreal.ca/~codeboot/codeboot"
+
+FILE="@C$(basename "$1")@0$(sed ':a;N;$!ba;s/\r//g;s/\n/@N/g' "$1")@E"
+xdg-open "$CODEBOOT/query.cgi?REPLAY=$(base64 <<< $FILE)"
