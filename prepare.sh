@@ -2,6 +2,11 @@
 
 # Usage: prepare.sh assignment[.zip]
 
+if [[ $# -eq 0 ]] ; then
+    echo "Besoin de l'archive .zip comme argument"
+    exit 1
+fi
+
 ASSIGNMENT="${1/.zip/}"
 
 # Extract
